@@ -3,16 +3,14 @@
 
 int main()
 {
-    int min = INT_MAX, max = INT_MIN;
+    int max = INT_MIN;
     for (int i = 0; i < 3; i++)
     {
         int num;
         scanf("%d", &num);
-        if (num < min)
-            min = num;
         if (num > max)
             max = num;
     }
-    printf("%d\n%d",min,max);
+    printf("%d", max);
     return 0;
 }

@@ -1,0 +1,25 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    int num;
+    cout << "Enter number : ";
+    cin >> num;
+    cout << "Factoring Result : ";
+    while (1)
+    {
+        int i;
+        for (i = 2; i <= num; i++)
+            if (num % i == 0)
+                break;
+        num /= i;
+        cout << i;
+        if (num == 1)
+            break;
+        else
+            cout << " x ";
+    }
+    return 0;
+}

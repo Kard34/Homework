@@ -1,0 +1,117 @@
+#include<iostream>
+#include<time.h>
+#include<conio.h>
+#include<windows.h>
+
+using namespace std;
+
+void setcursor(bool visible)
+{
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO lpCursor;
+	lpCursor.bVisible = visible;
+	lpCursor.dwSize = 20;
+	SetConsoleCursorInfo(console, &lpCursor);
+}
+
+void setcolor(int fg, int bg) {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, bg * 16 + fg);
+}
+
+void gotoxy(int x, int y)
+{
+	COORD c = { x, y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+
+void draw_border() {
+	int x = 61, y = 30; //border 61*30 (W*H);
+	char c = '*', b_1 = '-', b_2 = '|';
+	cout << c;
+	for (int i = 0; i < x - 2; i++)cout << b_1;
+	cout << c << endl;
+	for (int i = 0; i < y-2; i++) {
+		cout << b_2;
+		for (int j = 0; j < (x - 4) / 3; j++)cout << " ";
+		cout << b_2;
+		for (int j = 0; j < (x - 4) / 3; j++)cout << " ";
+		cout << b_2;
+		for (int j = 0; j < (x - 4) / 3; j++)cout << " ";
+		cout << b_2 << endl;
+	}
+	cout << c;
+	for (int i = 0; i < x - 2; i++)cout << b_1;
+	cout << c << endl;
+}
+
+void draw_ship(int x, int y) {
+	gotoxy(x, y);
+	//setcolor(7,8);
+	cout << "<-0->";
+}
+
+void clear_ship(int x, int y) {
+	gotoxy(x, y);
+	cout << "     ";
+}
+
+void draw_rocket(int x, int y) {
+	gotoxy(x, y);
+	cout << "^";
+}
+
+void clear_rocket(int x, int y) {
+	gotoxy(x, y);
+	cout << " ";
+}
+
+int main() {
+	int x = 28, y = 25, rx, ry;
+	char c = ' ';
+	bool rocket = false;
+	setcursor(0);
+	draw_border();
+	draw_ship(x, y);
+	do {
+		if (_kbhit()) {
+			c = _getch();
+			 if (c == 'a') {//Left
+				if (x - 20 > 0) {
+					clear_ship(x, y);
+					x -= 20;
+					draw_ship(x, y);
+				}
+			}
+			else if (c == 'd') {//Right
+				if (x + 20 < 60) {
+					clear_ship(x, y);
+					x += 20;
+					draw_ship(x, y);
+				}
+			}
+			else if (c == 'q' && rocket == false) {//Rocket
+				rocket = true;
+				rx = x + 2;
+				ry = y - 1;
+				draw_rocket(rx, ry);
+			}
+			else if (c == 'e') {//Shield
+
+			}
+		}
+		if (rocket == true) {
+			if (ry == 1) {
+				rocket = false;
+				clear_rocket(rx, ry);
+			}
+			else {
+				clear_rocket(rx, ry);
+				draw_rocket(rx, --ry);
+			}
+			}
+		Sleep(100);
+	}while (c != 'c');
+	
+	return 0;
+}

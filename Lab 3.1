@@ -5,7 +5,7 @@ int main()
     int num, result;
     scanf("%d", &num);
     printf("%d", num);
-    while (1)
+    while (num > 9)
     {
         result = 0;
         while (num != 0)
@@ -15,8 +15,6 @@ int main()
         }
         num = result;
         printf(" -> %d", result);
-        if (result < 10)
-            break;
     }
     return 0;
 }

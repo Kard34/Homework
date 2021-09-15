@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main()
+{
+    int n, x, y, result = 0;
+    scanf("%d", &n);
+    int arr[n];
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+    scanf("%d", &x);
+    scanf("%d", &y);
+    for (int i = x - 1; i < y; i++)
+        result += arr[i];
+    printf("%d", result);
+    return 0;
+}

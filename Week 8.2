@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+void swap(int *x, int *y)
+{
+    int t = *x;
+    *x = *y;
+    *y = t;
+}
+
+int main()
+{
+    int num[3];
+    for (int i = 0; i < 3; i++)
+        scanf("%d", &num[i]);
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2 - i; j++)
+            if (num[i] > num[i + 1])
+                swap(&num[i], &num[i + 1]);
+    printf("%d", num[0] + num[2]);
+    return 0;
+}

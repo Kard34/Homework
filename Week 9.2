@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <string.h>
+
+char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+char *morsecode[] = {".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--..", ".----", "..---", "...--", "....-", ".....", "-....", "--...", "---..", "----.", "-----"};
+//A-Z, 0-9
+char position(char morse[])
+{
+    for (int i = 0; i < 36; i++)
+        if (strcmp(morse, morsecode[i]) == 0)
+            return i;
+    return -1;
+}
+
+int main()
+{
+    char txt[100];
+    scanf("%[^\n]", txt);
+    char t = 0;
+    char tmp[100];
+    for (int i = 0; txt[i] != '\0'; i++)
+    {
+        if (txt[i] != ' ')
+            tmp[t++] = txt[i];
+        else
+        {
+            tmp[t] = '\0';
+            printf("%c ", alphabet[position(tmp)]);
+            t = 0;
+        }
+    }
+    tmp[t] = '\0';
+    printf("%c", alphabet[position(tmp)]);
+    return 0;
+}

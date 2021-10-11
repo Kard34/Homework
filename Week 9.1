@@ -7,10 +7,8 @@ char *morsecode[] = {".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", ".
 void translate(char alphabet)
 {
     for (int i = 0; i < 26 + 10; i++)
-    {
         if (alphabet == Ato9[i])
             printf("%s ", morsecode[i]);
-    }
 }
 
 int main()

@@ -1,28 +1,33 @@
 #include <stdio.h>
-#include <ctype.h>
-
+#include <string.h>
+//Morsecode -> Eng
 char Ato9[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 char *morsecode[] = {".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--..", ".----", "..---", "...--", "....-", ".....", "-....", "--...", "---..", "----.", "-----"};
 
-void translate(char alphabet)
+void translate(char mc[])
 {
     for (int i = 0; i < 26 + 10; i++)
-        if (alphabet == Ato9[i])
-            printf("%s ", morsecode[i]);
+        if (strcmp(mc, morsecode[i]) == 0)
+            printf("%c", Ato9[i]);
 }
 
 int main()
 {
     char txt[100];
-    printf("Input (A-Z, 0-9):");
+    printf("Input ('.', '-'):");
     scanf("%[^\n]", txt);
+    int t = 0;
+    char tmp[100];
     for (int i = 0; txt[i] != '\0'; i++)
     {
-        txt[i] = toupper(txt[i]);
-        if ((txt[i] >= 'A' && txt[i] <= 'Z') || (txt[i] >= '0' && txt[i] <= '9'))
-            translate(txt[i]);
-        else
-            printf("? ");
+        if (txt[i] != ' ')
+            tmp[t++] = txt[i];
+        if (txt[i] == ' ' || txt[i + 1] == '\0')
+        {
+            tmp[t] = '\0';
+            t = 0;
+            translate(tmp);
+        }
     }
     return 0;
 }

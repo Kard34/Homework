@@ -271,7 +271,7 @@ int main() {
 				up = 0;
 				level++;
 			}
-			if (gap++ >= 6 - level) {
+			if (gap++ >= 8 - level) {
 				gap = 0;
 				int lane = rand() % 3, ran = rand() % 100; //Item chance 3%
 				while (lane == lastlane) lane = rand() % 3;

@@ -1,0 +1,296 @@
+#include<stdio.h>
+#include<time.h>
+#include<conio.h>
+#include<windows.h>
+
+#define screen_x 100
+#define screen_y 31
+
+HANDLE wHnd;
+COORD bufferSize = { screen_x,screen_y };
+SMALL_RECT windowSize = { 0,0,screen_x - 1,screen_y - 1 };
+
+int setConsole() {
+	wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleWindowInfo(wHnd, TRUE, &windowSize);
+	SetConsoleScreenBufferSize(wHnd, bufferSize);
+	return 0;
+}
+
+void gotoxy(int x, int y) {
+	COORD c = { x,y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+
+void setcursor(bool visible) {
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO lpCursor;
+	lpCursor.bVisible = visible;
+	lpCursor.dwSize = 20;
+	SetConsoleCursorInfo(console, &lpCursor);
+}
+
+void game_border() {
+	int x = 60, y = 30;
+	char Line[] = "*-|";
+	gotoxy(0, 0);
+	printf("%c", Line[0]);
+	for (int i = 0; i < x; i++) printf("%c", Line[1]);
+	printf("%c\n", Line[0]);
+	for (int i = 0; i < y - 2; i++) {
+		printf("%c", Line[2]);
+		for (int j = 0; j < x; j++) printf("%c", ' ');
+		printf("%c\n", Line[2]);
+	}
+	printf("%c", Line[0]);
+	for (int i = 0; i < x; i++) printf("%c", Line[1]);
+	printf("%c\n", Line[0]);
+}
+
+void spacerunner() {
+	int x, y;
+	x = 3, y = 3;
+	gotoxy(x, y);
+	printf(" /////");
+	gotoxy(x, ++y);
+	printf("//   //");
+	gotoxy(x, ++y);
+	printf("//      //////   /////   /////   /////");
+	gotoxy(x, ++y);
+	printf(" /////  //   //      // //   // //   //");
+	gotoxy(x, ++y);
+	printf("     // //   //  ////// //      ///////");
+	gotoxy(x, ++y);
+	printf("//   // //   // //   // //   // //");
+	gotoxy(x, ++y);
+	printf(" /////  //////   //////  /////   /////");
+	gotoxy(x, ++y);
+	printf("        //");
+	gotoxy(x, ++y);
+	printf("        //");
+	x = 16, y = 11;
+	gotoxy(x, y);
+	printf("//////");
+	gotoxy(x, ++y);
+	printf("//   //");
+	gotoxy(x, ++y);
+	printf("//   // //   // /////  /////   /////  // //");
+	gotoxy(x, ++y);
+	printf("//////  //   // //  // //  // //   // ///");
+	gotoxy(x, ++y);
+	printf("// //   //   // //  // //  // /////// //");
+	gotoxy(x, ++y);
+	printf("//  //  //   // //  // //  // //      //");
+	gotoxy(x, ++y);
+	printf("//   //  ////// //  // //  //  /////  //");
+	gotoxy(14, 25);
+	printf("- Press any button to start game -");
+	gotoxy(0, 0);
+}
+
+void pause() {
+	int x, y;
+	x = 12, y = 7;
+	gotoxy(x, y);
+	printf("//////");
+	gotoxy(x, ++y);
+	printf("//   //");
+	gotoxy(x, ++y);
+	printf("//   // /////  //   //  /////   /////");
+	gotoxy(x, ++y);
+	printf("//////      // //   // //      //   //");
+	gotoxy(x, ++y);
+	printf("//      ////// //   //  /////  ///////");
+	gotoxy(x, ++y);
+	printf("//     //   // //   //      // //");
+	gotoxy(x, ++y);
+	printf("//      //////  ////// /////    /////");
+	gotoxy(15, 25);
+	printf("- Press any button to continue -");
+	gotoxy(0, 0);
+}
+
+void draw_ship(int x, int y) {
+	gotoxy(x, y);
+	printf("<-0->");
+}
+
+void erase_ship(int x, int y) {
+	gotoxy(x, y);
+	printf("     ");
+}
+
+void draw_rocket(int x, int y) {
+	gotoxy(x, y);
+	printf("^");
+}
+
+void erase_rocket(int x, int y) {
+	gotoxy(x, y);
+	printf(" ");
+}
+
+typedef struct movingobject {
+	int x, y;
+	bool state = false;
+	char item;
+}mo;
+
+mo met[20], left[10], right[10], item[10];
+
+void draw_meteorite(int x, int y) {
+	gotoxy(x, y);
+	printf("=====");
+	gotoxy(x, ++y);
+	printf("=====");
+	gotoxy(x, ++y);
+	printf("=====");
+}
+
+void draw_triangle_left_meteorite(int x, int y) {
+	gotoxy(x, y);
+	printf("    =");
+	gotoxy(x, ++y);
+	printf("  ===");
+	gotoxy(x, ++y);
+	printf("=====");
+}
+
+void draw_triangle_right_meteorite(int x, int y) {
+	gotoxy(x, y);
+	printf("=    ");
+	gotoxy(x, ++y);
+	printf("===  ");
+	gotoxy(x, ++y);
+	printf("=====");
+}
+
+void draw_item(int x, int y,char item) {
+	gotoxy(x, y);
+	printf("*---*");
+	gotoxy(x, ++y);
+	printf("| %c |", item);
+	gotoxy(x, ++y);
+	printf("*---*");
+}
+
+void erase_mo(int x, int y) {
+	gotoxy(x, y);
+	printf("     ");
+	gotoxy(x, ++y);
+	printf("     ");
+	gotoxy(x, ++y);
+	printf("     ");
+}
+
+int main() {
+	int x = 20, y = 20;
+	int met_gap[] = { 0,0,0 };
+	setConsole();
+	setcursor(0);
+	game_border();
+	draw_ship(x, y);
+	srand(time(NULL));
+	char c = ' ', direction = ' ';
+	do {
+		if (met_gap[0]++ == 4) {
+			met_gap[0] = 0;
+			for (int i = 0; i < 20; i++) {
+				if (!met[i].state) {
+					met[i].state = true;
+					met[i].x = 1 + (rand() % 54);
+					met[i].y = 1;
+					draw_meteorite(met[i].x, met[i].y);
+					break;
+				}
+			}
+		}
+		if (met_gap[1]++ == 4) {
+			met_gap[1] = 0;
+			for (int i = 0; i < 10; i++) {
+				if (!left[i].state) {
+					left[i].state = true;
+					left[i].x = 3;
+					left[i].y = 1 + (rand() % 26);
+					draw_triangle_left_meteorite(left[i].x, left[i].y);
+					break;
+				}
+			}
+		}
+		if (met_gap[2]++ == 4) {
+			met_gap[2] = 0;
+			for (int i = 0; i < 10; i++) {
+				if (!right[i].state) {
+					right[i].state = true;
+					right[i].x = 55;
+					right[i].y = 1 + (rand() % 26);
+					draw_triangle_right_meteorite(right[i].x, right[i].y);
+					break;
+				}
+			}
+		}
+		if (_kbhit()) {
+			c = _getch();
+			if (c == 'w')direction = 'w';
+			else if (c == 'x')direction = 'x';
+			else if (c == 'a')direction = 'a';
+			else if (c == 'd')direction = 'd';
+			else if (c == 's')direction = ' ';
+			fflush(stdin);
+		}
+		if (direction == 'w') {
+			erase_ship(x, y);
+			draw_ship(x, --y);
+		}
+		else if (direction == 'x') {
+			erase_ship(x, y);
+			draw_ship(x, ++y);
+		}
+		else if (direction == 'a') {
+			erase_ship(x, y);
+			draw_ship(--x, y);
+		}
+		else if (direction == 'd') {
+			erase_ship(x, y);
+			draw_ship(++x, y);
+		}
+		for (int i = 0; i < 10; i++) {
+			if (left[i].state) {
+				if (left[i].x + 5 == 60 || left[i].y + 1 == 27) {
+					erase_mo(left[i].x, left[i].y);
+					left[i].state = false;
+				}
+				else {
+					erase_mo(left[i].x, left[i].y);
+					draw_triangle_left_meteorite(++left[i].x, ++left[i].y);
+				}
+			}
+		}
+		for (int i = 0; i < 10; i++) {
+			if (right[i].state) {
+				if (right[i].x - 1 == 1 || right[i].y + 1 == 27) {
+					erase_mo(right[i].x, right[i].y);
+					right[i].state = false;
+				}
+				else {
+					erase_mo(right[i].x, right[i].y);
+					draw_triangle_right_meteorite(--right[i].x, ++right[i].y);
+				}
+			}
+		}
+		for (int i = 0; i < 20; i++) {
+			if (met[i].state) {
+				if (met[i].y + 1 == 27) {
+					erase_mo(met[i].x, met[i].y);
+					met[i].state = false;
+				}
+				else {
+					erase_mo(met[i].x, met[i].y);
+					draw_meteorite(met[i].x, ++met[i].y);
+				}
+			}
+		}
+		Sleep(100);
+	} while (c != 'p');
+	return 0;
+}

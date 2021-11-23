@@ -311,8 +311,8 @@ int main() {
 	setConsole();
 	setcursor(0);
 	game_border();
+	spacerunner();
 	while (1) {
-		spacerunner();
 		if (_kbhit()) {
 			char t = _getch();
 			break;

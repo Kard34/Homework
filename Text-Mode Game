@@ -1,7 +1,12 @@
+#define _CRT_SECURE_NO_WARNINGS 1
 #include<stdio.h>
 #include<time.h>
+#include<string>
 #include<conio.h>
+#include<iostream>
 #include<windows.h>
+
+using namespace std;
 
 #define screen_x 100
 #define screen_y 31
@@ -48,6 +53,7 @@ void game_border() {
 }
 
 void spacerunner() {
+	game_border();
 	int x, y;
 	x = 3, y = 3;
 	gotoxy(x, y);
@@ -89,6 +95,7 @@ void spacerunner() {
 }
 
 void pause() {
+	game_border();
 	int x, y;
 	x = 12, y = 7;
 	gotoxy(x, y);
@@ -136,7 +143,7 @@ typedef struct movingobject {
 	char item;
 }mo;
 
-mo met[20], left[10], right[10], item[10];
+mo met[20], mleft[10], mright[10], item[10];
 
 void draw_meteorite(int x, int y) {
 	gotoxy(x, y);
@@ -193,245 +200,444 @@ bool point_in(int x, int y, int n, int m) {
 	return 0;
 }
 
+void scoring(string playername, int playerscore) {
+	FILE* fp;
+	struct board {
+		string name;
+		unsigned int score;
+	}b[6];
+	b[5].name = playername;
+	b[5].score = playerscore;
+	fp = fopen("Score.txt", "r");
+	for (int i = 0; i < 5; i++) {
+		char string_tmp[255];
+		fscanf(fp, "%s", &string_tmp);
+		b[i].name = string_tmp;
+		fscanf(fp, "%d", &b[i].score);
+	}
+	fclose(fp);
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 5 - i; j++) {
+			if (b[j].score < b[j + 1].score) {
+				unsigned int int_tmp;
+				int_tmp = b[j].score;
+				b[j].score = b[j + 1].score;
+				b[j + 1].score = int_tmp;
+				string string_tmp;
+				string_tmp = b[j].name;
+				b[j].name = b[j + 1].name;
+				b[j + 1].name = string_tmp;
+			}
+		}
+	}
+	fp = fopen("Score.txt", "w");
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; b[i].name[j] != '\0'; j++) {
+			fprintf(fp, "%c", b[i].name[j]);
+		}
+		fprintf(fp, " %d\n", b[i].score);
+	}
+	fclose(fp);
+}
+
+void game_over() {
+	game_border();
+	int x, y;
+	x = 4, y = 3;
+	gotoxy(x, y);
+	printf(" /////");
+	gotoxy(x, ++y);
+	printf("//   //");
+	gotoxy(x, ++y);
+	printf("//       /////  /// //   /////");
+	gotoxy(x, ++y);
+	printf("//  ///      // // / // //   //");
+	gotoxy(x, ++y);
+	printf("//   //  ////// // / // ///////");
+	gotoxy(x, ++y);
+	printf("//   // //   // // / // //");
+	gotoxy(x, ++y);
+	printf(" /////   ////// // / //  /////");
+	x = 29, y = 11;
+	gotoxy(x, y);
+	printf(" ///// ");
+	gotoxy(x, ++y);
+	printf("//   //");
+	gotoxy(x, ++y);
+	printf("//   // //   //  /////  // //");
+	gotoxy(x, ++y);
+	printf("//   // //   // //   // ///");
+	gotoxy(x, ++y);
+	printf("//   // //   // /////// //");
+	gotoxy(x, ++y);
+	printf("//   //  // //  //      //");
+	gotoxy(x, ++y);
+	printf(" /////    ///    /////  //");
+	gotoxy(7, 13);
+	printf(" HIGHSCORES");
+	x = 5, y = 15;
+	FILE* fp;
+	struct board {
+		string name;
+		unsigned int score;
+	}b[5];
+	fp = fopen("Score.txt", "r");
+	for (int i = 0; i < 5; i++) {
+		char string_tmp[255];
+		fscanf(fp, "%s", &string_tmp);
+		b[i].name = string_tmp;
+		fscanf(fp, "%d", &b[i].score);
+	}
+	fclose(fp);
+	for (int i = 0; i < 5; i++) {
+		gotoxy(x, y);
+		cout << i + 1 << ". " << b[i].name;
+		gotoxy(x + 10, y);
+		cout << b[i].score << endl;
+		y++;
+	}
+}
+
 int main() {
-	int x = 30, y = 15;
+	char c = ' ', direction = ' ';
+	int x = 30, y = 25;
 	int rx = 0, ry = 0;
 	bool rocket = false;
 	int met_gap[] = { 0,0,0 };
+	int ah = 3, ar = 1;
+	size_t score = 0;
+	string playername;
+	bool quit = false;
 	setConsole();
 	setcursor(0);
 	game_border();
-	draw_ship(x, y);
-	srand(time(NULL));
-	char c = ' ', direction = ' ';
-	do {
-		if (met_gap[0]++ == 4) {
-			met_gap[0] = 0;
-			int ran = rand() % 100;
-			if (ran < 3) {
-				for (int i = 0; i < 10; i++) {
-					if (!item[i].state) {
-						item[i].state = true;
-						item[i].x = 1 + (rand() % 54);
-						item[i].y = 1;
-						int it = rand() % 2;
-						if (it == 0)item[i].item = 'H';
-						else item[i].item = 'R';
-						draw_item(item[i].x, item[i].y, item[i].item);
-						break;
-					}
-				}
-			}
-			else {
-				for (int i = 0; i < 20; i++) {
-					if (!met[i].state) {
-						met[i].state = true;
-						met[i].x = 1 + (rand() % 54);
-						met[i].y = 1;
-						draw_meteorite(met[i].x, met[i].y);
-						break;
-					}
-				}
-			}
-		}
-		if (met_gap[1]++ == 10) {
-			met_gap[1] = 0;
-			for (int i = 0; i < 10; i++) {
-				if (!left[i].state) {
-					int ran = rand() % 2;
-					left[i].state = true;
-					if (ran) {
-						left[i].x = 3;
-						left[i].y = 1 + (rand() % 10);
-					}
-					else {
-						left[i].x = 1 + (rand() % 45);
-						left[i].y = 1;
-					}
-					draw_triangle_left_meteorite(left[i].x, left[i].y);
-					break;
-				}
-			}
-		}
-		if (met_gap[2]++ == 10) {
-			met_gap[2] = 0;
-			for (int i = 0; i < 10; i++) {
-				if (!right[i].state) {
-					int ran = rand() % 2;
-					right[i].state = true;
-					if (ran) {
-						right[i].x = 55;
-						right[i].y = 1 + (rand() % 10);
-					}
-					else {
-						right[i].x = 55 - (rand() % 40);
-						right[i].y = 1;
-					}
-					draw_triangle_right_meteorite(right[i].x, right[i].y);
-					break;
-				}
-			}
-		}
+	while (1) {
+		spacerunner();
 		if (_kbhit()) {
-			c = _getch();
-			if (c == 'w')direction = 'w';
-			else if (c == 's')direction = 's';
-			else if (c == 'a')direction = 'a';
-			else if (c == 'd')direction = 'd';
-			else if (c == 'r' && !rocket) {
-				rocket = true;
-				rx = x + 2;
-				ry = y - 2;
-				draw_rocket(rx, ry);
-			}
-			else direction = ' ';
-			fflush(stdin);
+			char t = _getch();
+			break;
 		}
-		if (direction == 'w' && y - 1 >= 1) {
-			erase_ship(x, y);
-			draw_ship(x, --y);
-		}
-		else if (direction == 's' && y +1 <= 28) {
-			erase_ship(x, y);
-			draw_ship(x, ++y);
-		}
-		else if (direction == 'a' && x -1 >= 1) {
-			erase_ship(x, y);
-			draw_ship(--x, y);
-		}
-		else if (direction == 'd' && x +1 <= 56) {
-			erase_ship(x, y);
-			draw_ship(++x, y);
-		}
-		if (rocket) {
-			if (ry == 1) {
-				erase_rocket(rx, ry);
-				rocket = false;
-				rx = 0;
-				ry = 0;
-			}
-			else {
-				erase_rocket(rx, ry);
-				draw_rocket(rx, --ry);
-			}
-		}
+		fflush(stdin);
+	}
+	while (!quit) {
+		srand(time(NULL));
+		game_border();
+		c = ' ', direction = ' ';
+		x = 30, y = 25;
+		rx = 0, ry = 0;
+		rocket = false;
+		for (int i = 0; i < 3; i++)met_gap[i] = 0;
+		ah = 3, ar = 1;
+		score = 0;
+		for (int i = 0; i < 20; i++)met[i].state = false;
 		for (int i = 0; i < 10; i++) {
-			if (left[i].state) {
-				if (left[i].x + 5 == 60 || left[i].y + 1 == 27) {
-					erase_mo(left[i].x, left[i].y);
-					left[i].state = false;
+			mleft[i].state = false;
+			mright[i].state = false;
+			item[i].state = false;
+		}
+		gotoxy(65, 2);
+		printf("          ");
+		gotoxy(65, 4);
+		printf("   ", ah);
+		gotoxy(65, 6);
+		printf("   ", ar);
+		do {
+			if (met_gap[0]++ == 4) {
+				met_gap[0] = 0;
+				int ran = rand() % 100;
+				if (ran < 5) {
+					for (int i = 0; i < 10; i++) {
+						if (!item[i].state) {
+							item[i].state = true;
+							item[i].x = 1 + (rand() % 54);
+							item[i].y = 1;
+							int it = rand() % 2;
+							if (it == 0)item[i].item = 'H';
+							else item[i].item = 'R';
+							draw_item(item[i].x, item[i].y, item[i].item);
+							break;
+						}
+					}
 				}
 				else {
-					for (int j = 0; j < 5; j++) {
-						if (point_in(x + j, y, left[i].x, left[i].y)) {
-							erase_mo(left[i].x, left[i].y);
-							left[i].state = false;
+					for (int i = 0; i < 20; i++) {
+						if (!met[i].state) {
+							met[i].state = true;
+							met[i].x = 1 + (rand() % 54);
+							met[i].y = 1;
+							draw_meteorite(met[i].x, met[i].y);
+							break;
 						}
-					}
-					if (rx != 0 && ry != 0) {
-						if (point_in(rx, ry, left[i].x, left[i].y)) {
-							erase_mo(left[i].x, left[i].y);
-							left[i].state = false;
-							rocket = false;
-							rx = 0;
-							ry = 0;
-						}
-					}
-					if (left[i].state) {
-						erase_mo(left[i].x, left[i].y);
-						draw_triangle_left_meteorite(++left[i].x, ++left[i].y);
 					}
 				}
 			}
-		}
-		for (int i = 0; i < 10; i++) {
-			if (right[i].state) {
-				if (right[i].x - 1 == 1 || right[i].y + 1 == 27) {
-					erase_mo(right[i].x, right[i].y);
-					right[i].state = false;
-				}
-				else {
-					for (int j = 0; j < 5; j++) {
-						if (point_in(x + j, y, right[i].x, right[i].y)) {
-							erase_mo(right[i].x, right[i].y);
-							right[i].state = false;
+			if (met_gap[1]++ == 10) {
+				met_gap[1] = 0;
+				for (int i = 0; i < 10; i++) {
+					if (!mleft[i].state) {
+						int ran = rand() % 2;
+						mleft[i].state = true;
+						if (ran) {
+							mleft[i].x = 3;
+							mleft[i].y = 1 + (rand() % 10);
 						}
-					}
-					if (rx != 0 && ry != 0) {
-						if (point_in(rx, ry, right[i].x, right[i].y)) {
-							erase_mo(right[i].x, right[i].y);
-							right[i].state = false;
-							rocket = false;
-							rx = 0;
-							ry = 0;
+						else {
+							mleft[i].x = 1 + (rand() % 45);
+							mleft[i].y = 1;
 						}
-					}
-					if (right[i].state) {
-						erase_mo(right[i].x, right[i].y);
-						draw_triangle_right_meteorite(--right[i].x, ++right[i].y);
+						draw_triangle_left_meteorite(mleft[i].x, mleft[i].y);
+						break;
 					}
 				}
 			}
-		}
-		for (int i = 0; i < 20; i++) {
-			if (met[i].state) {
-				if (met[i].y + 1 == 27) {
-					erase_mo(met[i].x, met[i].y);
-					met[i].state = false;
+			if (met_gap[2]++ == 10) {
+				met_gap[2] = 0;
+				for (int i = 0; i < 10; i++) {
+					if (!mright[i].state) {
+						int ran = rand() % 2;
+						mright[i].state = true;
+						if (ran) {
+							mright[i].x = 55;
+							mright[i].y = 1 + (rand() % 10);
+						}
+						else {
+							mright[i].x = 55 - (rand() % 40);
+							mright[i].y = 1;
+						}
+						draw_triangle_right_meteorite(mright[i].x, mright[i].y);
+						break;
+					}
+				}
+			}
+			if (_kbhit()) {
+				c = _getch();
+				if (c == 'w')direction = 'w';
+				else if (c == 's')direction = 's';
+				else if (c == 'a')direction = 'a';
+				else if (c == 'd')direction = 'd';
+				else if (c == 'r' && !rocket && ar) {
+					rocket = true;
+					rx = x + 2;
+					ry = y - 2;
+					ar = 0;
+					draw_rocket(rx, ry);
+				}
+				else if (c == 'p') {
+					pause();
+					direction = ' ';
+					while (1) {
+						if (_kbhit()) {
+							c = _getch();
+							game_border();
+							break;
+						}
+					}
+					c = ' ';
+				}
+				else direction = ' ';
+				fflush(stdin);
+			}
+			if (direction == 'w' && y - 1 >= 1) {
+				erase_ship(x, y);
+				draw_ship(x, --y);
+			}
+			else if (direction == 's' && y + 1 <= 28) {
+				erase_ship(x, y);
+				draw_ship(x, ++y);
+			}
+			else if (direction == 'a' && x - 1 >= 1) {
+				erase_ship(x, y);
+				draw_ship(--x, y);
+			}
+			else if (direction == 'd' && x + 1 <= 56) {
+				erase_ship(x, y);
+				draw_ship(++x, y);
+			}
+			if (rocket) {
+				if (ry == 1) {
+					erase_rocket(rx, ry);
+					rocket = false;
+					rx = 0;
+					ry = 0;
 				}
 				else {
-					for (int j = 0; j < 5; j++) {
-						if (point_in(x + j, y, met[i].x, met[i].y)) {
-							erase_mo(met[i].x, met[i].y);
-							met[i].state = false;
+					erase_rocket(rx, ry);
+					draw_rocket(rx, --ry);
+				}
+			}
+			for (int i = 0; i < 10; i++) {
+				if (mleft[i].state) {
+					if (mleft[i].x + 5 == 60 || mleft[i].y + 1 == 27) {
+						erase_mo(mleft[i].x, mleft[i].y);
+						mleft[i].state = false;
+					}
+					else {
+						for (int j = 0; j < 5; j++) {
+							if (point_in(x + j, y, mleft[i].x, mleft[i].y)) {
+								erase_mo(mleft[i].x, mleft[i].y);
+								mleft[i].state = false;
+								ah--;
+								break;
+							}
+						}
+						if (rx != 0 && ry != 0) {
+							if (point_in(rx, ry, mleft[i].x, mleft[i].y)) {
+								erase_mo(mleft[i].x, mleft[i].y);
+								mleft[i].state = false;
+								rocket = false;
+								rx = 0;
+								ry = 0;
+							}
+						}
+						if (mleft[i].state) {
+							erase_mo(mleft[i].x, mleft[i].y);
+							draw_triangle_left_meteorite(++mleft[i].x, ++mleft[i].y);
 						}
 					}
-					if (rx != 0 && ry != 0) {
-						if (point_in(rx, ry, met[i].x, met[i].y)) {
-							erase_mo(met[i].x, met[i].y);
-							met[i].state = false;
-							rocket = false;
-							rx = 0;
-							ry = 0;
+				}
+			}
+			for (int i = 0; i < 10; i++) {
+				if (mright[i].state) {
+					if (mright[i].x - 1 == 1 || mright[i].y + 1 == 27) {
+						erase_mo(mright[i].x, mright[i].y);
+						mright[i].state = false;
+					}
+					else {
+						for (int j = 0; j < 5; j++) {
+							if (point_in(x + j, y, mright[i].x, mright[i].y)) {
+								erase_mo(mright[i].x, mright[i].y);
+								mright[i].state = false;
+								ah--;
+								break;
+							}
+						}
+						if (rx != 0 && ry != 0) {
+							if (point_in(rx, ry, mright[i].x, mright[i].y)) {
+								erase_mo(mright[i].x, mright[i].y);
+								mright[i].state = false;
+								rocket = false;
+								rx = 0;
+								ry = 0;
+							}
+						}
+						if (mright[i].state) {
+							erase_mo(mright[i].x, mright[i].y);
+							draw_triangle_right_meteorite(--mright[i].x, ++mright[i].y);
 						}
 					}
-					if (met[i].state) {
+				}
+			}
+			for (int i = 0; i < 20; i++) {
+				if (met[i].state) {
+					if (met[i].y + 1 == 27) {
 						erase_mo(met[i].x, met[i].y);
-						draw_meteorite(met[i].x, ++met[i].y);
+						met[i].state = false;
+					}
+					else {
+						for (int j = 0; j < 5; j++) {
+							if (point_in(x + j, y, met[i].x, met[i].y)) {
+								erase_mo(met[i].x, met[i].y);
+								met[i].state = false;
+								ah--;
+								break;
+							}
+						}
+						if (rx != 0 && ry != 0) {
+							if (point_in(rx, ry, met[i].x, met[i].y)) {
+								erase_mo(met[i].x, met[i].y);
+								met[i].state = false;
+								rocket = false;
+								rx = 0;
+								ry = 0;
+							}
+						}
+						if (met[i].state) {
+							erase_mo(met[i].x, met[i].y);
+							draw_meteorite(met[i].x, ++met[i].y);
+						}
 					}
 				}
 			}
-		}
-		for (int i = 0; i < 10; i++) {
-			if (item[i].state) {
-				if (item[i].y + 1 == 27) {
-					erase_mo(item[i].x, item[i].y);
-					item[i].state = false;
-				}
-				else {
-					for (int j = 0; j < 5; j++) {
-						if (point_in(x + j, y, item[i].x, item[i].y)) {
-							erase_mo(item[i].x, item[i].y);
-							item[i].state = false;
-						}
-					}
-					if (rx != 0 && ry != 0) {
-						if (point_in(rx, ry, item[i].x, item[i].y)) {
-							erase_mo(item[i].x, item[i].y);
-							item[i].state = false;
-							rocket = false;
-							rx = 0;
-							ry = 0;
-						}
-					}
-					if (item[i].state) {
+			for (int i = 0; i < 10; i++) {
+				if (item[i].state) {
+					if (item[i].y + 1 == 27) {
 						erase_mo(item[i].x, item[i].y);
-						draw_item(item[i].x, ++item[i].y, item[i].item);
+						item[i].state = false;
+					}
+					else {
+						for (int j = 0; j < 5; j++) {
+							if (point_in(x + j, y, item[i].x, item[i].y)) {
+								erase_mo(item[i].x, item[i].y);
+								item[i].state = false;
+							}
+						}
+						if (rx != 0 && ry != 0) {
+							if (point_in(rx, ry, item[i].x, item[i].y)) {
+								erase_mo(item[i].x, item[i].y);
+								item[i].state = false;
+								rocket = false;
+								rx = 0;
+								ry = 0;
+							}
+						}
+						if (item[i].state) {
+							erase_mo(item[i].x, item[i].y);
+							draw_item(item[i].x, ++item[i].y, item[i].item);
+						}
+						else {
+							if (item[i].item == 'R')ar = 1;
+							else if (item[i].item == 'H' && ah < 5)ah++;
+						}
 					}
 				}
 			}
-		}
+			gotoxy(65, 1);
+			printf("Score");
+			gotoxy(65, 2);
+			printf("%d", score++);
+			gotoxy(65, 3);
+			printf("Health");
+			gotoxy(65, 4);
+			printf("%d", ah);
+			gotoxy(65, 5);
+			printf("Rocket");
+			gotoxy(65, 6);
+			printf("%d", ar);
+			draw_ship(x, y);
+			Sleep(100);
+		} while (ah > 0);
+		game_over();
 		Sleep(100);
-	} while (c != 'p');
+		gotoxy(12, 22);
+		setcursor(1);
+		printf("Enter your name : ");
+		cin >> playername;
+		scoring(playername, score);
+		setcursor(0);
+		gotoxy(12, 27);
+		printf("Restart");
+		gotoxy(42, 27);
+		printf("Quit");
+		int cx = 10, cy = 27;
+		do {
+			gotoxy(cx, cy);
+			printf("->");
+			if (_kbhit()) {
+				c = _getch();
+				if (c == 'a') {
+					gotoxy(cx, cy);
+					printf("  ");
+					cx = 10;
+					quit = false;
+				}
+				else if (c == 'd') {
+					gotoxy(cx, cy);
+					printf("  ");
+					cx = 40;
+					quit = true;
+				}
+			}
+		} while (c != ' ');
+	}
 	return 0;
 }

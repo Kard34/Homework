@@ -467,127 +467,119 @@ int main() {
 			}
 			for (int i = 0; i < 10; i++) {
 				if (mleft[i].state) {
+					for (int j = 0; j < 5; j++) {
+						if (point_in(x + j, y, mleft[i].x, mleft[i].y)) {
+							erase_mo(mleft[i].x, mleft[i].y);
+							mleft[i].state = false;
+							ah--;
+							break;
+						}
+					}
+					if (rx != 0 && ry != 0) {
+						if (point_in(rx, ry, mleft[i].x, mleft[i].y)) {
+							erase_mo(mleft[i].x, mleft[i].y);
+							mleft[i].state = false;
+							rocket = false;
+							rx = 0;
+							ry = 0;
+						}
+					}
 					if (mleft[i].x + 5 == 60 || mleft[i].y + 1 == 27) {
 						erase_mo(mleft[i].x, mleft[i].y);
 						mleft[i].state = false;
 					}
-					else {
-						for (int j = 0; j < 5; j++) {
-							if (point_in(x + j, y, mleft[i].x, mleft[i].y)) {
-								erase_mo(mleft[i].x, mleft[i].y);
-								mleft[i].state = false;
-								ah--;
-								break;
-							}
-						}
-						if (rx != 0 && ry != 0) {
-							if (point_in(rx, ry, mleft[i].x, mleft[i].y)) {
-								erase_mo(mleft[i].x, mleft[i].y);
-								mleft[i].state = false;
-								rocket = false;
-								rx = 0;
-								ry = 0;
-							}
-						}
-						if (mleft[i].state) {
-							erase_mo(mleft[i].x, mleft[i].y);
-							draw_triangle_left_meteorite(++mleft[i].x, ++mleft[i].y);
-						}
+					if (mleft[i].state) {
+						erase_mo(mleft[i].x, mleft[i].y);
+						draw_triangle_left_meteorite(++mleft[i].x, ++mleft[i].y);
 					}
 				}
 			}
 			for (int i = 0; i < 10; i++) {
 				if (mright[i].state) {
+					for (int j = 0; j < 5; j++) {
+						if (point_in(x + j, y, mright[i].x, mright[i].y)) {
+							erase_mo(mright[i].x, mright[i].y);
+							mright[i].state = false;
+							ah--;
+							break;
+						}
+					}
+					if (rx != 0 && ry != 0) {
+						if (point_in(rx, ry, mright[i].x, mright[i].y)) {
+							erase_mo(mright[i].x, mright[i].y);
+							mright[i].state = false;
+							rocket = false;
+							rx = 0;
+							ry = 0;
+						}
+					}
 					if (mright[i].x - 1 == 1 || mright[i].y + 1 == 27) {
 						erase_mo(mright[i].x, mright[i].y);
 						mright[i].state = false;
 					}
-					else {
-						for (int j = 0; j < 5; j++) {
-							if (point_in(x + j, y, mright[i].x, mright[i].y)) {
-								erase_mo(mright[i].x, mright[i].y);
-								mright[i].state = false;
-								ah--;
-								break;
-							}
-						}
-						if (rx != 0 && ry != 0) {
-							if (point_in(rx, ry, mright[i].x, mright[i].y)) {
-								erase_mo(mright[i].x, mright[i].y);
-								mright[i].state = false;
-								rocket = false;
-								rx = 0;
-								ry = 0;
-							}
-						}
-						if (mright[i].state) {
-							erase_mo(mright[i].x, mright[i].y);
-							draw_triangle_right_meteorite(--mright[i].x, ++mright[i].y);
-						}
+					if(mright[i].state) {
+						erase_mo(mright[i].x, mright[i].y);
+						draw_triangle_right_meteorite(--mright[i].x, ++mright[i].y);
 					}
 				}
 			}
 			for (int i = 0; i < 20; i++) {
 				if (met[i].state) {
+					for (int j = 0; j < 5; j++) {
+						if (point_in(x + j, y, met[i].x, met[i].y)) {
+							erase_mo(met[i].x, met[i].y);
+							met[i].state = false;
+							ah--;
+							break;
+						}
+					}
+					if (rx != 0 && ry != 0) {
+						if (point_in(rx, ry, met[i].x, met[i].y)) {
+							erase_mo(met[i].x, met[i].y);
+							met[i].state = false;
+							rocket = false;
+							rx = 0;
+							ry = 0;
+						}
+					}
 					if (met[i].y + 1 == 27) {
 						erase_mo(met[i].x, met[i].y);
 						met[i].state = false;
 					}
-					else {
-						for (int j = 0; j < 5; j++) {
-							if (point_in(x + j, y, met[i].x, met[i].y)) {
-								erase_mo(met[i].x, met[i].y);
-								met[i].state = false;
-								ah--;
-								break;
-							}
-						}
-						if (rx != 0 && ry != 0) {
-							if (point_in(rx, ry, met[i].x, met[i].y)) {
-								erase_mo(met[i].x, met[i].y);
-								met[i].state = false;
-								rocket = false;
-								rx = 0;
-								ry = 0;
-							}
-						}
-						if (met[i].state) {
-							erase_mo(met[i].x, met[i].y);
-							draw_meteorite(met[i].x, ++met[i].y);
-						}
+					if(met[i].state) {
+						erase_mo(met[i].x, met[i].y);
+						draw_meteorite(met[i].x, ++met[i].y);
 					}
 				}
 			}
 			for (int i = 0; i < 10; i++) {
 				if (item[i].state) {
+					for (int j = 0; j < 5; j++) {
+						if (point_in(x + j, y, item[i].x, item[i].y)) {
+							erase_mo(item[i].x, item[i].y);
+							item[i].state = false;
+						}
+					}
+					if (rx != 0 && ry != 0) {
+						if (point_in(rx, ry, item[i].x, item[i].y)) {
+							erase_mo(item[i].x, item[i].y);
+							item[i].state = false;
+							rocket = false;
+							rx = 0;
+							ry = 0;
+						}
+					}
 					if (item[i].y + 1 == 27) {
 						erase_mo(item[i].x, item[i].y);
 						item[i].state = false;
 					}
+					if (item[i].state) {
+						erase_mo(item[i].x, item[i].y);
+						draw_item(item[i].x, ++item[i].y, item[i].item);
+					}
 					else {
-						for (int j = 0; j < 5; j++) {
-							if (point_in(x + j, y, item[i].x, item[i].y)) {
-								erase_mo(item[i].x, item[i].y);
-								item[i].state = false;
-							}
-						}
-						if (rx != 0 && ry != 0) {
-							if (point_in(rx, ry, item[i].x, item[i].y)) {
-								erase_mo(item[i].x, item[i].y);
-								item[i].state = false;
-								rocket = false;
-								rx = 0;
-								ry = 0;
-							}
-						}
-						if (item[i].state) {
-							erase_mo(item[i].x, item[i].y);
-							draw_item(item[i].x, ++item[i].y, item[i].item);
-						}
-						else {
-							if (item[i].item == 'R')ar = 1;
-							else if (item[i].item == 'H' && ah < 5)ah++;
-						}
+						if (item[i].item == 'R')ar = 1;
+						else if (item[i].item == 'H' && ah < 5)ah++;
 					}
 				}
 			}
